@@ -8,14 +8,14 @@ Herkese Merhaba ;
 
 terminalden veya  cmd ekranından python sinema.py yazılması halinde calisiyor.
 
-Bilinen ve üzerinde düzeltmeye calistigim bazı sorunlar --> 
+Bilinen ve üzerinde düzeltmeye calistigim bazı sorunlar:                                                                   
 --> pencere otomatik kapanmaması
 --> Kayıt işlemi sonunda otomatik refresh yapılamaması
 --> Kayit Düzeltme olmaması (Bunun için kayıdı silip bastan kayıt yapılması)
 --> Koltuk sayısı hesaplama(Bos - Dolu)
 --> Film baslama bitis mola saatleri eklenmemesi
 
-Bilinmesi gerekenler :
+Bilinmesi gerekenler :                                                                                                        
 --> öncelikle film ekle butonundan film isimleri yazılır
 --> Her Filmin 3 adet salonu vardır
 --> Her Salona ait 14 adet Koltuk vardır
