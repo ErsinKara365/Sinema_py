@@ -8,12 +8,7 @@ import datetime
 from tkinter import messagebox
 from sqlite3.dbapi2 import Cursor, Error
 
-
-
-
 global koltukSec
-
-
 
 def CreateDatabase():
 	conn = sql.connect("Sinema.sql")
@@ -40,6 +35,7 @@ def veriTabaniKayit (bilet_no, isim , soyisim ,filmadi, koltukno) :
 		olustur.commit()
 		olustur.close()
 		messagebox.showinfo("Kayit Basarili","{} Kayit Edilmiştir".format(bilet_no))
+		koltukSec(filmadi ) 
 		panel.destroy()
 	except :
 		messagebox.showinfo("HATA","Veritabani Kayit Hatasi!")
@@ -84,18 +80,39 @@ def koltukkayit(filmadi, koltukno) :
 
 	panel.mainloop()
 	
-
 def listele (filmadi) :
 	sorgula = "SELECT * FROM Sinema WHERE FilmAdi='{}'"
 	sor = sql.connect("Sinema.sql")
 	baglan = sor.cursor()
 	baglan.execute(sorgula.format(filmadi))
 	veriler = baglan.fetchall()
-
-	for ata in veriler :
-		print("listele -> " , ata)
-
 	baglan.close()
+	listelePanel = TK.Tk()
+	listelePanel.geometry("700x350+100+200")
+	listelePanel.title("Sinema Müşteri Listesi")
+	
+	baslik = TK.Frame(listelePanel, width=700 ,height=50, bg="skyblue")
+	baslik.place(x=0, y=0)
+	TK.Label(baslik, text="Bilet Numarasi" ,bg = "skyblue").place(x=30, y=18)
+	TK.Label(baslik, text="İsim" ,bg = "skyblue").place(x=150, y=18)
+	TK.Label(baslik, text="Soyisim" ,bg = "skyblue").place(x=210, y=18)
+	TK.Label(baslik, text="Film Adi" ,bg = "skyblue").place(x=290, y=18)
+	TK.Label(baslik, text="Koltuk No" ,bg = "skyblue").place(x=380, y=18)
+	TK.Label(baslik, text="Kayit Tarihi" ,bg = "skyblue").place(x=500, y=18)
+
+	sayi = int(60)
+	for ata in veriler :
+		TK.Label(listelePanel, text=ata[1]).place(x=35, y=sayi)
+		TK.Label(listelePanel, text=ata[2]).place(x=150, y=sayi)
+		TK.Label(listelePanel, text=ata[3]).place(x=225, y=sayi)
+		TK.Label(listelePanel, text=ata[4]).place(x=300, y=sayi)
+		TK.Label(listelePanel, text=ata[5]).place(x=375, y=sayi)
+		TK.Label(listelePanel, text=ata[6]).place(x=500, y=sayi)
+		sayi+=30
+
+
+	TK.Button(listelePanel, command= lambda : listelePanel.destroy(), bg="red", width=6, height=2 ,text="Kapat").pack(side="bottom", pady=15)
+	listelePanel.mainloop()
 
 def koltukKontrol (filmadi) :
 	sorgula = "SELECT KoltukNo FROM Sinema WHERE FilmAdi='{}'"
@@ -110,19 +127,70 @@ def koltukKontrol (filmadi) :
 
 	return koltukliste
 		
+def veriguncelle ():
+	yenisim = isimgun.get().upper()
+	yenisoysim = soyisimgun.get().upper()
+	gunconn = sql.connect("Sinema.sql")
+	gunconn.cursor()
+	gunconn.execute("UPDATE Sinema SET isim='{}', soyisim='{}' WHERE BiletNo='{}'".format(yenisim, yenisoysim, biletNumarasi))
+	gunconn.commit()
+	gunconn.close()
+	musteriPanel.destroy()
 
+def verisil (secilenFilm) :
+	gunconn = sql.connect("Sinema.sql")
+	gunconn.cursor()
+	gunconn.execute("DELETE FROM Sinema  WHERE BiletNo='{}'".format( biletNumarasi))
+	gunconn.commit()
+	gunconn.close()
+	musteriPanel.destroy()
+	koltukSec(secilenFilm ) 
 
-def koltukguncelle (filmadi , koltukno) :
-	print("Film Adi -> ", filmadi , " Koltuk No -> ", koltukno)
-	pass
+def guncelle (filmadi, koltukno) :
+	global isimgun, soyisimgun, biletNumarasi , musteriPanel
+	musteri = []
+	gun = sql.connect("Sinema.sql")
+	guncursor = gun.cursor()
+	soru = "SELECT * FROM Sinema WHERE FilmAdi='{}' and KoltukNo='{}'"
+	guncursor.execute(soru.format(filmadi, koltukno))
+	musteriler = guncursor.fetchall()
 
+	for ata in musteriler[0] :
+		musteri.append(ata)
+	guncursor.close()
+	biletNumarasi = musteri[1]
+	musteriPanel = TK.Tk()
+	musteriPanel.geometry("400x400+300+300")
+	musteriPanel.title("Musteri Bilgileri Güncelleme")
+	TK.Label(musteriPanel, text="Bilet Numarası").grid(row=0, column=0, padx=10, pady=10)
+	TK.Label(musteriPanel, text="İsim").grid(row=1, column=0, padx=10, pady=10)
+	TK.Label(musteriPanel, text="Soyisim").grid(row=2, column=0, padx=10, pady=10)
+	TK.Label(musteriPanel, text="Film Adı").grid(row=3, column=0, padx=10, pady=10)
+	TK.Label(musteriPanel, text="Koltuk Numarası").grid(row=4, column=0, padx=10, pady=10)
+	TK.Label(musteriPanel, text="Kayit Tarihi").grid(row=5, column=0, padx=10, pady=10)
+	
+	TK.Label(musteriPanel, text=musteri[1]).grid(row=0, column=1, padx=10, pady=10)
+	isimgun = TK.Entry(musteriPanel)
+	isimgun.insert(0, '{}'.format(musteri[2]))
+	isimgun.grid(row=1, column=1, padx=10, pady=10)
+	
+	soyisimgun= TK.Entry(musteriPanel)
+	soyisimgun.insert(0, '{}'.format(musteri[3]))
+	soyisimgun.grid(row=2, column=1, padx=10, pady=10)
+	TK.Label(musteriPanel, text=musteri[4]).grid(row=3, column=1, padx=10, pady=10)
+	TK.Label(musteriPanel, text=musteri[5]).grid(row=4, column=1, padx=10, pady=10)
+	TK.Label(musteriPanel, text=musteri[6]).grid(row=5, column=1, padx=10, pady=10)
 
+	TK.Button (musteriPanel, text="Guncelle" ,command=veriguncelle , bg="green" , height=2, width=7).grid(row=7, column=0, padx=10, pady=10)
+	TK.Button (musteriPanel, text="Sil" ,command= lambda : verisil (musteri[4]) , bg="red" , height=2, width=7).grid(row=7, column=1, padx=10, pady=10)
 
+	musteriPanel.mainloop()
 
 def koltukSec(filmadi ) :
+	
 	global koltuk1,koltuk2,koltuk3,koltuk4,koltuk5,koltuk6,koltuk7,koltuk8,koltuk9,koltuk10,koltuk11,koltuk12,koltuk13,koltuk14,koltuk15,koltuk16,koltuk17,koltuk18,koltuk19,koltuk20
 	koltukliste = koltukKontrol(filmadi)
-
+	
 	perde = TK.Frame(menu, width=460, height=100, bg="red").place(x=225,y=10)
 	TK.Label(perde, text="Burasi Sahne").place(x=350, y=50)	
 	
@@ -189,47 +257,45 @@ def koltukSec(filmadi ) :
 	TK.Button(menu,text="Listele" ,command=lambda : listele(filmadi), bg="green", fg="black", width=5, height=2).place(x=400,y=600)
 
 	if "Koltuk1" in koltukliste :
-		koltuk1.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk1.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk1"), text="Güncelle")
 	if "Koltuk2" in koltukliste :
-		koltuk2.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk2.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk2"), text="Güncelle")
 	if "Koltuk3" in koltukliste :
-		koltuk3.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk3.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk3"), text="Güncelle")
 	if "Koltuk4" in koltukliste :
-		koltuk4.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk4.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk4"), text="Güncelle")
 	if "Koltuk5" in koltukliste :
-		koltuk5.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk5.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk5"), text="Güncelle")
 	if "Koltuk6" in koltukliste :
-		koltuk6.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk6.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk6"), text="Güncelle")
 	if "Koltuk7" in koltukliste :
-		koltuk7.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk7.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk7"), text="Güncelle")
 	if "Koltuk8" in koltukliste :
-		koltuk8.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk8.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk8"), text="Güncelle")
 	if "Koltuk9" in koltukliste :
-		koltuk9.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk9.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk9"), text="Güncelle")
 	if "Koltuk10" in koltukliste :
-		koltuk10.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk10.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk10"), text="Güncelle")
 	if "Koltuk11" in koltukliste :
-		koltuk11.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk11.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk11"), text="Güncelle")
 	if "Koltuk12" in koltukliste :
-		koltuk12.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk12.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk12"), text="Güncelle")
 	if "Koltuk13" in koltukliste :
-		koltuk13.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk13.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk13"), text="Güncelle")
 	if "Koltuk14" in koltukliste :
-		koltuk14.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk14.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk14"), text="Güncelle")
 	if "Koltuk15" in koltukliste :
-		koltuk15.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk15.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk15"), text="Güncelle")
 	if "Koltuk16" in koltukliste :
-		koltuk16.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk16.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk16"), text="Güncelle")
 	if "Koltuk17" in koltukliste :
-		koltuk17.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk17.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk17"), text="Güncelle")
 	if "Koltuk18" in koltukliste :
-		koltuk18.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk18.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk18"), text="Güncelle")
 	if "Koltuk19" in koltukliste :
-		koltuk19.configure(bg="red" , state="disabled", text="Dolu")
+		koltuk19.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk19"), text="Güncelle")
 	if "Koltuk20" in koltukliste :
-		koltuk20.configure(bg="red" , state="disabled", text="Dolu")
-	
-
+		koltuk20.configure(bg="red" , command=lambda : guncelle (filmadi, "Koltuk20"), text="Güncelle")
 	
 def filmKaydetDef(filmler):
 	try :
@@ -255,9 +321,9 @@ def filmKaydetDef(filmler):
 		pass
 	filmEklePanel.destroy()
 	
-
-
 def kayitkontrol () :
+	
+	
 	filmler = []
 	film1isim = str(film1.get().upper())
 	film2isim = str(film2.get().upper())
@@ -279,15 +345,17 @@ def kayitkontrol () :
 	if (bool(film6isim)) :
 		filmler.append(film6isim)
 
-	filmKaydetDef(filmler)
+	if (bool(filmler)):
+		filmEkle.configure(state="disabled")
 
+	filmKaydetDef(filmler)
 
 def filmEklemeDef ():
 	global filmEklePanel
 	global film1, film2, film3, film4, film5, film6
 
 	filmEklePanel= TK.Tk()
-	filmEklePanel.geometry("500x500+300+100")
+	filmEklePanel.geometry("350x300+300+100")
 	filmEklePanel.title("Film Ekleme Paneli")
 	TK.Label(filmEklePanel, text="Film Ekle -> ").place(x=25, y=25)
 	film1 = TK.Entry(filmEklePanel ,bg="white", fg="black" )
@@ -311,9 +379,17 @@ def filmEklemeDef ():
 	TK.Button(filmEklePanel, text="Kaydet" , command= kayitkontrol , fg="black").place(x=100, y=200)
 	filmEklePanel.mainloop()
 
+def temizle ():
+	evet = messagebox.askokcancel(title="Dikkat!!" , message="Veritabanı Tamamen Silinecektir.\n Onaylıyor musunuz ?")
+	if evet :
+		os.remove("Sinema.sql")
+		menu.destroy()
+		os.system("python3 Menu.py")
+	else :
+		pass
 
-def menuDef():
-	global menu, solFrame
+def menuDef(filmler):
+	global menu, solFrame , filmEkle
 	CreateDatabase()
 	menu = TK.Tk()
 	menu.geometry("700x700+100+100")
@@ -322,26 +398,53 @@ def menuDef():
 	solFrame = TK.Frame(menu, height=700, width=200, bg="yellow")
 	solFrame.place(x=0,y=0)
 
-	filmEkle = TK.Button(solFrame, text="Film Ekle" , fg="black", width=15, command=filmEklemeDef)
-	filmEkle.place(x=25,y=25)
+	if(bool(filmler)) :
+		filmEkle = TK.Button(solFrame, text="Film Ekle" , fg="black", width=15, command=filmEklemeDef, state="disabled")
+		filmEkle.place(x=25,y=25)
+		try :
+			if (bool(filmler[0])) :
+				film1Button = TK.Button(solFrame, text=filmler[0] , fg="black", bg="green", width=16 , command=lambda : koltukSec(filmler[0]))
+				film1Button.place(x=25, y=100)
+			if (bool(filmler[1])) :
+				film2Button = TK.Button(solFrame, text=filmler[1] , fg="black", bg="green", width=16 , command=lambda : koltukSec(filmler[1]))
+				film2Button.place(x=25, y=125)
+			if (bool(filmler[2])) :
+				film3Button = TK.Button(solFrame, text=filmler[2] , fg="black", bg="green", width=16 , command=lambda : koltukSec(filmler[2]))
+				film3Button.place(x=25, y=150)
+			if (bool(filmler[3])) :
+				film4Button = TK.Button(solFrame, text=filmler[3] , fg="black", bg="green", width=16, command=lambda : koltukSec(filmler[3]) )
+				film4Button.place(x=25, y=175)
+			if (bool(filmler[4])) :
+				film5Button = TK.Button(solFrame, text=filmler[4] , fg="black", bg="green", width=16 , command=lambda : koltukSec(filmler[4]))
+				film5Button.place(x=25, y=200)
+			if (bool(filmler[5])) :
+				film6Button = TK.Button(solFrame, text=filmler[5] , fg="black", bg="green", width=16 , command=lambda : koltukSec(filmler[5]))
+				film6Button.place(x=25, y=225)
+		except  :
+			pass
+	else :
+		filmEkle = TK.Button(solFrame, text="Film Ekle" , fg="black", width=15, command=filmEklemeDef)
+		filmEkle.place(x=25,y=25)
 
 	cikis = TK.Button(menu, text="Cikis",command= lambda : menu.destroy() , width=15, height=2, bg="red").place(x=25, y=600) 
+	cikis = TK.Button(solFrame, text="Temizle",command= temizle , width=15, height=2, bg="pink").place(x=25, y=525) 
 	menu.mainloop()
 
 def basla () :
+	global filmler
+	filmler = []
 	if "Sinema.sql" in os.listdir(".") :
 		bag = sql.connect("Sinema.sql")
 		baglan = bag.cursor()
 		baglan.execute("SELECT FilmAdi  FROM Sinema GROUP BY FilmAdi")
 		sinemaListe = baglan.fetchall()
-		filmler = []
+		
 		if bool(sinemaListe) :
 			for ata in sinemaListe:
 				filmler.append(ata[0])
-			os.system("python3 menu2.py")
-			sys.exit()
+			menuDef (filmler)
 		else :
-			menuDef()
+			menuDef(filmler)
 	else :
-		menuDef()
+		menuDef(filmler)
 basla()
