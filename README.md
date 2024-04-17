@@ -1,16 +1,17 @@
-Merhaba , 
+Herkese Merhaba,                                                                                                                                                                                                                                               
+ Linux :
+ 
+python3 sinema.py
 
-öncelikle python3 menu.py şeklinde calistirdigin zaman otomatik olarak Sinema.sql adında bir veritabanı olusturuyor.
+ windows :
+	komut penceresinden yapılması gerekiyor.
+ 	python3 sinema.py 
 
-Not: her yeniden baslattıgında mutlaka Sinema.sql veritabanını siliniz. aksi takdirde çalışmayacaktır. cunku 2.bir sayfaya yönlendirme yaptım.
+  yazmanız yeterli olacaktır.
+
+  Sorularınız için :
+  instagram :	Ersinkara365
+  telegram 	:	Ersinkara365
 
 
-Sıkıntılarım şöyle : 
-
-1 = film ekledikten sonra sayfa yenilemesi yapamıyorum. eğer sayfa yenileme yapılabilirse kayıt olunan koltuk numarası dolu olarak degisecektir. 
-2= film ekledikten sonra üst kısımda film ekleme butonun disabled olarak yapmak istiyorum ancak buton değişkenine ulaşamıyorum.
-
-
-Şimdilik bunlar
-Teşekürler
-
+  Teşekkürler
